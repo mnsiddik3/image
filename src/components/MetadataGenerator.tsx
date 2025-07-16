@@ -26,6 +26,68 @@ interface ImageBatch {
   id: string;
 }
 
+// Keyword validation function to prevent stuffing
+const validateAndCleanKeywords = (keywords: string[]): string[] => {
+  if (!keywords || !Array.isArray(keywords)) return [];
+  
+  // Convert to lowercase for comparison
+  const processed = keywords.map(k => k.trim().toLowerCase());
+  const unique = new Set<string>();
+  const stems = new Set<string>();
+  
+  // Common word variations to avoid
+  const variations: { [key: string]: string[] } = {
+    'work': ['work', 'working', 'worker', 'workplace', 'workstation'],
+    'business': ['business', 'corporate', 'professional', 'commercial', 'enterprise'],
+    'happy': ['happy', 'joyful', 'cheerful', 'delighted', 'pleased'],
+    'success': ['success', 'successful', 'achievement', 'accomplishment'],
+    'team': ['team', 'teamwork', 'collaboration', 'cooperative'],
+    'technology': ['technology', 'technological', 'tech', 'digital'],
+    'people': ['people', 'person', 'individuals', 'humans'],
+    'hand': ['hand', 'hands', 'finger', 'fingers'],
+    'office': ['office', 'workspace', 'workplace'],
+    'meeting': ['meeting', 'conference', 'discussion'],
+    'computer': ['computer', 'laptop', 'desktop', 'pc'],
+    'finance': ['finance', 'financial', 'money', 'economic'],
+    'data': ['data', 'information', 'analytics', 'statistics'],
+    'growth': ['growth', 'growing', 'development', 'progress'],
+    'modern': ['modern', 'contemporary', 'current', 'new']
+  };
+  
+  const cleanedKeywords: string[] = [];
+  
+  for (const keyword of processed) {
+    if (!keyword || keyword.length < 2) continue;
+    
+    // Check if we already have this exact keyword
+    if (unique.has(keyword)) continue;
+    
+    // Check for stem conflicts (prevent work/working/worker etc.)
+    let hasConflict = false;
+    for (const [stem, variants] of Object.entries(variations)) {
+      if (variants.includes(keyword)) {
+        if (stems.has(stem)) {
+          hasConflict = true;
+          break;
+        }
+        stems.add(stem);
+        break;
+      }
+    }
+    
+    if (hasConflict) continue;
+    
+    // Add to unique set and final array
+    unique.add(keyword);
+    cleanedKeywords.push(keyword);
+    
+    // Stop at 25 keywords maximum
+    if (cleanedKeywords.length >= 25) break;
+  }
+  
+  return cleanedKeywords.slice(0, 25);
+};
+
 const MetadataGenerator = () => {
   const [imageBatch, setImageBatch] = useState<ImageBatch[]>([]);
   const [apiKey, setApiKey] = useState<string>(localStorage.getItem('gemini-api-key') || '');
@@ -118,12 +180,27 @@ const MetadataGenerator = () => {
                     text: `Analyze this stock image and generate comprehensive metadata optimized for iStock, Adobe Stock, Shutterstock, and Freepik. Provide a JSON response with:
                     - title: A catchy, SEO-friendly title (max 60 characters)
                     - description: Detailed description for stock photo sites (max 150 characters)
-                    - keywords: Array of 20-25 relevant keywords/tags for general search
-                    - topTenKeywords: Array of exactly 10 most important keywords prioritized for stock photo sites (iStock, Adobe Stock, Shutterstock, Freepik)
+                    - keywords: Array of EXACTLY 20-25 unique keywords/tags for general search
+                    - topTenKeywords: Array of exactly 10 most important keywords prioritized for stock photo sites
                     - altText: Accessible alt text description
                     - category: Main category (e.g., Business, Nature, Technology, People, Abstract, etc.)
                     
-                    Focus on commercial use, marketability, and searchability. Make keywords highly relevant for stock photo buyers. The topTenKeywords should be the most searchable and commercial terms that buyers would use on these platforms.`
+                    CRITICAL KEYWORD RULES - NO EXCEPTIONS:
+                    1. Maximum 20-25 keywords total - count them carefully
+                    2. NO repetitive words (avoid: work/working/worker, business/corporate/professional together)
+                    3. NO similar meanings or synonyms in same set
+                    4. Each keyword must attract DIFFERENT buyer traffic
+                    5. Each keyword must be COMPLETELY UNIQUE in meaning and purpose
+                    6. Focus on specific, commercial terms that buyers actually search for
+                    7. Avoid generic adjectives - use specific nouns and action words
+                    8. topTenKeywords must be most commercially valuable terms
+                    
+                    Examples of what NOT to do:
+                    - "business, corporate, professional" (similar meanings)
+                    - "work, working, worker" (repetitive forms)
+                    - "happy, joyful, cheerful" (synonyms)
+                    
+                    Focus on commercial use, marketability, and unique searchable terms. Each keyword should target a different buyer intent.`
                   },
                   {
                     inlineData: {
@@ -147,6 +224,9 @@ const MetadataGenerator = () => {
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const result = JSON.parse(jsonMatch[0]);
+            
+            // Validate and clean keywords according to strict rules
+            result.keywords = validateAndCleanKeywords(result.keywords);
             
             // Ensure topTenKeywords exists and has exactly 10 items
             if (!result.topTenKeywords || result.topTenKeywords.length !== 10) {
