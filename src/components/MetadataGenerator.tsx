@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Sparkles, Copy, Download, Settings, Image as ImageIcon, X, FileImage, Play, Pause, Eye, EyeOff } from 'lucide-react';
+import { Upload, Sparkles, Copy, Download, Settings, Image as ImageIcon, X, FileImage, Play, Pause, Eye, EyeOff, RotateCcw } from 'lucide-react';
 
 interface MetadataResult {
   title: string;
@@ -427,6 +427,49 @@ const MetadataGenerator = () => {
     setCurrentProcessingIndex(-1);
   };
 
+  const regenerateMetadata = async (imageId: string) => {
+    const image = imageBatch.find(img => img.id === imageId);
+    if (!image || !apiKey) return;
+
+    // Set processing state for this specific image
+    setImageBatch(prev => prev.map(img => 
+      img.id === imageId 
+        ? { ...img, isProcessing: true, metadata: null }
+        : img
+    ));
+
+    try {
+      const metadata = await generateSingleMetadata(image.file);
+      
+      // Update with new metadata
+      setImageBatch(prev => prev.map(img => 
+        img.id === imageId 
+          ? { ...img, metadata, isProcessing: false }
+          : img
+      ));
+
+      toast({
+        title: "Regenerated!",
+        description: `New metadata generated for ${image.file.name}`
+      });
+      
+    } catch (error) {
+      console.error(`Error regenerating metadata for ${image.file.name}:`, error);
+      
+      setImageBatch(prev => prev.map(img => 
+        img.id === imageId 
+          ? { ...img, isProcessing: false }
+          : img
+      ));
+
+      toast({
+        title: "Regeneration Failed",
+        description: `Failed to regenerate metadata for ${image.file.name}`,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-bg p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -765,6 +808,29 @@ const MetadataGenerator = () => {
                                     </div>
                                   </DialogContent>
                                 </Dialog>
+                              </div>
+
+                              {/* Regenerate Button */}
+                              <div className="pt-2 border-t border-border/50">
+                                <Button
+                                  onClick={() => regenerateMetadata(image.id)}
+                                  disabled={image.isProcessing}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs h-7 px-2 w-full"
+                                >
+                                  {image.isProcessing ? (
+                                    <>
+                                      <div className="w-3 h-3 mr-1 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                      Regenerating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <RotateCcw className="w-3 h-3 mr-1" />
+                                      Regenerate
+                                    </>
+                                  )}
+                                </Button>
                               </div>
 
                               {/* Title & Category */}
