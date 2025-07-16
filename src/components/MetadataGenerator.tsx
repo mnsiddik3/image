@@ -407,8 +407,7 @@ const MetadataGenerator = () => {
       content += `=== Image ${index + 1}: ${image.file.name} ===\n\n`;
       content += `Title: ${metadata.title}\n\n`;
       content += `Description: ${metadata.description}\n\n`;
-      content += `Top 10 Keywords: ${metadata.topTenKeywords.join(', ')}\n\n`;
-      content += `All Keywords: ${metadata.keywords.join(', ')}\n\n`;
+      content += `Keywords: ${metadata.keywords.join(', ')}\n\n`;
       content += `Alt Text: ${metadata.altText}\n\n`;
       content += `Category: ${metadata.category}\n\n`;
       content += '---\n\n';
@@ -605,16 +604,16 @@ const MetadataGenerator = () => {
                           
                           {image.metadata && (
                             <div className="space-y-3 p-2 bg-accent/10 rounded-lg">
-                              {/* Top 10 Keywords Section */}
+                              {/* All Keywords Section */}
                               <div>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-xs font-semibold text-primary">Top 10 Keywords</span>
+                                  <span className="text-xs font-semibold text-primary">All Keywords</span>
                                   <Badge variant="outline" className="text-xs px-1 py-0">
-                                    Stock Ready
+                                    {image.metadata.keywords.length} keywords
                                   </Badge>
                                 </div>
                                 <div className="flex flex-wrap gap-1">
-                                  {image.metadata.topTenKeywords.map((keyword, idx) => (
+                                  {image.metadata.keywords.map((keyword, idx) => (
                                     <span 
                                       key={idx} 
                                       className="inline-block px-2 py-1 text-xs bg-primary/10 text-primary border border-primary/20 rounded-full hover:bg-primary/20 transition-colors cursor-pointer"
@@ -629,22 +628,13 @@ const MetadataGenerator = () => {
                               {/* Action Buttons */}
                               <div className="flex gap-1">
                                 <Button
-                                  onClick={() => copyToClipboard(image.metadata!.topTenKeywords.join(', '))}
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs h-7 px-2"
-                                >
-                                  <Copy className="w-3 h-3 mr-1" />
-                                  Top 10
-                                </Button>
-                                <Button
                                   onClick={() => copyToClipboard(image.metadata!.keywords.join(', '))}
                                   variant="outline"
                                   size="sm"
                                   className="text-xs h-7 px-2"
                                 >
                                   <Copy className="w-3 h-3 mr-1" />
-                                  All ({image.metadata.keywords.length})
+                                  Copy All Keywords
                                 </Button>
                                 <Dialog>
                                   <DialogTrigger asChild>
