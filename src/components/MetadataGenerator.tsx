@@ -699,35 +699,6 @@ const MetadataGenerator = () => {
                                         </div>
                                       </div>
 
-                                      {/* Top 10 Keywords Section - Adobe Stock Style */}
-                                      <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                          <Label className="text-sm font-semibold">Top 10 Keywords (Stock Optimized)</Label>
-                                          <Button
-                                            onClick={() => copyToClipboard(image.metadata!.topTenKeywords.join(', '))}
-                                            variant="outline"
-                                            size="sm"
-                                          >
-                                            <Copy className="w-4 h-4 mr-2" />
-                                            Copy All
-                                          </Button>
-                                        </div>
-                                        <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                                          <div className="flex flex-wrap gap-2">
-                                            {image.metadata!.topTenKeywords.map((keyword, idx) => (
-                                              <span 
-                                                key={idx}
-                                                className="inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary text-sm border border-primary/30 rounded-full hover:bg-primary/20 transition-colors cursor-pointer"
-                                                onClick={() => copyToClipboard(keyword)}
-                                              >
-                                                {keyword}
-                                                <Copy className="w-3 h-3 ml-1 opacity-50" />
-                                              </span>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      </div>
-
                                       {/* All Keywords Section */}
                                       <div className="space-y-3">
                                         <div className="flex items-center justify-between">
@@ -741,15 +712,16 @@ const MetadataGenerator = () => {
                                             Copy All
                                           </Button>
                                         </div>
-                                        <div className="p-4 bg-accent/10 rounded-lg border">
+                                        <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
                                           <div className="flex flex-wrap gap-2">
                                             {image.metadata!.keywords.map((keyword, idx) => (
                                               <span 
                                                 key={idx}
-                                                className="inline-block px-2 py-1 bg-accent text-accent-foreground text-sm border rounded-md hover:bg-accent/80 transition-colors cursor-pointer"
+                                                className="inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary text-sm border border-primary/30 rounded-full hover:bg-primary/20 transition-colors cursor-pointer"
                                                 onClick={() => copyToClipboard(keyword)}
                                               >
                                                 {keyword}
+                                                <Copy className="w-3 h-3 ml-1 opacity-50" />
                                               </span>
                                             ))}
                                           </div>
