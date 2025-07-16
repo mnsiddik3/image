@@ -220,14 +220,21 @@ const MetadataGenerator = () => {
                   {
                     text: `You are a professional stock photo metadata expert. Analyze this image and generate metadata optimized for iStock, Adobe Stock, Shutterstock, and Freepik.
 
-                    STRICT REQUIREMENTS - NO EXCEPTIONS:
+                    METADATA CONSISTENCY REQUIREMENTS:
+                    1. First generate TITLE and DESCRIPTION
+                    2. Then create keywords that SUPPORT and EXPAND on the title/description concepts
+                    3. Keywords must be DIRECTLY RELATED to what's described in title/description
+                    4. Maintain semantic consistency across all metadata elements
+                    
+                    STRICT KEYWORD REQUIREMENTS - NO EXCEPTIONS:
                     
                     1. KEYWORDS: Generate EXACTLY 15-20 completely unique keywords
-                    2. NO REPETITION: Never use variations of same word (work/working/worker)
-                    3. NO SYNONYMS: Never use similar meanings (business/corporate/professional)
-                    4. UNIQUE BUYER INTENT: Each keyword targets different buyer searches
-                    5. COMMERCIAL FOCUS: Only commercially valuable search terms
-                    6. SPECIFIC TERMS: Avoid generic adjectives, use specific nouns/verbs
+                    2. TITLE/DESCRIPTION ALIGNMENT: Keywords must relate to and support the title/description themes
+                    3. NO REPETITION: Never use variations of same word (work/working/worker)
+                    4. NO SYNONYMS: Never use similar meanings (business/corporate/professional)
+                    5. UNIQUE BUYER INTENT: Each keyword targets different buyer searches while staying thematically connected
+                    6. COMMERCIAL FOCUS: Only commercially valuable search terms that relate to the image content
+                    7. SPECIFIC TERMS: Avoid generic adjectives, use specific nouns/verbs that match the title/description
                     
                     FORBIDDEN COMBINATIONS (never use together):
                     - work, working, worker, workplace, workforce
@@ -242,15 +249,21 @@ const MetadataGenerator = () => {
                     - man, male, gentleman, masculine
                     - woman, female, lady, feminine
                     
+                    KEYWORD GENERATION PROCESS:
+                    1. Identify main themes from your title and description
+                    2. Create keywords that expand on these themes
+                    3. Include related concepts that buyers would search for
+                    4. Ensure each keyword serves the same target market as title/description
+                    
                     Generate JSON with:
                     - title: SEO title (max 60 chars)
                     - description: Stock site description (max 150 chars)  
-                    - keywords: Array of 15-20 unique commercial keywords
-                    - topTenKeywords: Best 10 keywords from the main list
+                    - keywords: Array of 15-20 unique keywords that MATCH title/description themes
+                    - topTenKeywords: Best 10 keywords from the main list that best support title/description
                     - altText: Accessibility description
                     - category: Main category
                     
-                    Count keywords carefully. Quality over quantity. Each keyword must serve a unique commercial purpose.`
+                    Remember: Keywords should feel like a natural extension of your title and description, not random words about the image.`
                   },
                   {
                     inlineData: {
