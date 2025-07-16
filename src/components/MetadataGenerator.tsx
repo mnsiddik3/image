@@ -26,32 +26,58 @@ interface ImageBatch {
   id: string;
 }
 
-// Keyword validation function to prevent stuffing
+// Enhanced keyword validation function to prevent stuffing
 const validateAndCleanKeywords = (keywords: string[]): string[] => {
   if (!keywords || !Array.isArray(keywords)) return [];
   
-  // Convert to lowercase for comparison
-  const processed = keywords.map(k => k.trim().toLowerCase());
-  const unique = new Set<string>();
-  const stems = new Set<string>();
+  // Convert to lowercase for comparison and clean
+  const processed = keywords
+    .map(k => k.trim().toLowerCase())
+    .filter(k => k && k.length >= 2);
   
-  // Common word variations to avoid
-  const variations: { [key: string]: string[] } = {
-    'work': ['work', 'working', 'worker', 'workplace', 'workstation'],
-    'business': ['business', 'corporate', 'professional', 'commercial', 'enterprise'],
-    'happy': ['happy', 'joyful', 'cheerful', 'delighted', 'pleased'],
-    'success': ['success', 'successful', 'achievement', 'accomplishment'],
-    'team': ['team', 'teamwork', 'collaboration', 'cooperative'],
-    'technology': ['technology', 'technological', 'tech', 'digital'],
-    'people': ['people', 'person', 'individuals', 'humans'],
-    'hand': ['hand', 'hands', 'finger', 'fingers'],
-    'office': ['office', 'workspace', 'workplace'],
-    'meeting': ['meeting', 'conference', 'discussion'],
-    'computer': ['computer', 'laptop', 'desktop', 'pc'],
-    'finance': ['finance', 'financial', 'money', 'economic'],
-    'data': ['data', 'information', 'analytics', 'statistics'],
-    'growth': ['growth', 'growing', 'development', 'progress'],
-    'modern': ['modern', 'contemporary', 'current', 'new']
+  const unique = new Set<string>();
+  const usedStems = new Set<string>();
+  const usedConcepts = new Set<string>();
+  
+  // Enhanced word variations and similar concepts to avoid
+  const wordVariations: { [key: string]: string[] } = {
+    'work': ['work', 'working', 'worker', 'workers', 'workplace', 'workstation', 'workforce', 'workshop'],
+    'business': ['business', 'corporate', 'professional', 'commercial', 'enterprise', 'company', 'organization'],
+    'success': ['success', 'successful', 'achievement', 'accomplish', 'accomplishment', 'achieve', 'winning'],
+    'team': ['team', 'teamwork', 'collaboration', 'collaborative', 'cooperative', 'group', 'partnership'],
+    'technology': ['technology', 'technological', 'tech', 'digital', 'technical', 'digitization'],
+    'people': ['people', 'person', 'individuals', 'humans', 'human', 'personnel', 'staff'],
+    'hand': ['hand', 'hands', 'finger', 'fingers', 'palm', 'fist'],
+    'office': ['office', 'workspace', 'workplace', 'workstation', 'desk'],
+    'meeting': ['meeting', 'conference', 'discussion', 'presentation', 'seminar', 'workshop'],
+    'computer': ['computer', 'laptop', 'desktop', 'pc', 'device', 'monitor'],
+    'finance': ['finance', 'financial', 'money', 'economic', 'economy', 'fiscal', 'monetary'],
+    'data': ['data', 'information', 'analytics', 'statistics', 'stats', 'analysis'],
+    'growth': ['growth', 'growing', 'development', 'progress', 'progression', 'advancement'],
+    'modern': ['modern', 'contemporary', 'current', 'new', 'recent', 'latest'],
+    'young': ['young', 'youth', 'youthful', 'junior', 'adolescent'],
+    'happy': ['happy', 'joyful', 'cheerful', 'pleased', 'delighted', 'smiling', 'smile'],
+    'man': ['man', 'male', 'gentleman', 'guy', 'masculine'],
+    'woman': ['woman', 'female', 'lady', 'girl', 'feminine'],
+    'phone': ['phone', 'mobile', 'smartphone', 'cellphone', 'telephone'],
+    'build': ['building', 'construction', 'architecture', 'structure'],
+    'learn': ['learning', 'education', 'study', 'studying', 'training'],
+    'create': ['creative', 'creativity', 'creation', 'design', 'designing'],
+    'look': ['looking', 'view', 'viewing', 'see', 'seeing', 'watching'],
+    'communication': ['communication', 'communicate', 'talking', 'speaking', 'conversation']
+  };
+
+  // Semantic concept groups - avoid having multiple words from same concept
+  const conceptGroups: { [key: string]: string[] } = {
+    'emotion_positive': ['happy', 'joy', 'cheerful', 'pleased', 'delighted', 'excited', 'satisfied'],
+    'emotion_negative': ['sad', 'angry', 'frustrated', 'worried', 'stressed'],
+    'work_concept': ['work', 'job', 'career', 'profession', 'employment', 'labor'],
+    'business_concept': ['business', 'corporate', 'commercial', 'enterprise', 'company'],
+    'time_concept': ['time', 'clock', 'hour', 'minute', 'schedule', 'deadline'],
+    'size_concept': ['big', 'large', 'huge', 'giant', 'massive', 'enormous'],
+    'color_basic': ['red', 'blue', 'green', 'yellow', 'white', 'black'],
+    'direction': ['up', 'down', 'left', 'right', 'forward', 'backward'],
+    'age_concept': ['young', 'old', 'new', 'ancient', 'modern', 'vintage']
   };
   
   const cleanedKeywords: string[] = [];
@@ -59,33 +85,48 @@ const validateAndCleanKeywords = (keywords: string[]): string[] => {
   for (const keyword of processed) {
     if (!keyword || keyword.length < 2) continue;
     
-    // Check if we already have this exact keyword
+    // Check if exact keyword already exists
     if (unique.has(keyword)) continue;
     
-    // Check for stem conflicts (prevent work/working/worker etc.)
-    let hasConflict = false;
-    for (const [stem, variants] of Object.entries(variations)) {
+    let shouldSkip = false;
+    
+    // Check for word variation conflicts
+    for (const [stem, variants] of Object.entries(wordVariations)) {
       if (variants.includes(keyword)) {
-        if (stems.has(stem)) {
-          hasConflict = true;
+        if (usedStems.has(stem)) {
+          shouldSkip = true;
           break;
         }
-        stems.add(stem);
+        usedStems.add(stem);
         break;
       }
     }
     
-    if (hasConflict) continue;
+    if (shouldSkip) continue;
+    
+    // Check for concept group conflicts
+    for (const [concept, words] of Object.entries(conceptGroups)) {
+      if (words.includes(keyword)) {
+        if (usedConcepts.has(concept)) {
+          shouldSkip = true;
+          break;
+        }
+        usedConcepts.add(concept);
+        break;
+      }
+    }
+    
+    if (shouldSkip) continue;
     
     // Add to unique set and final array
     unique.add(keyword);
     cleanedKeywords.push(keyword);
     
-    // Stop at 25 keywords maximum
-    if (cleanedKeywords.length >= 25) break;
+    // Stop at 22 keywords maximum (stricter limit)
+    if (cleanedKeywords.length >= 22) break;
   }
   
-  return cleanedKeywords.slice(0, 25);
+  return cleanedKeywords.slice(0, 22);
 };
 
 const MetadataGenerator = () => {
@@ -177,30 +218,39 @@ const MetadataGenerator = () => {
               contents: [{
                 parts: [
                   {
-                    text: `Analyze this stock image and generate comprehensive metadata optimized for iStock, Adobe Stock, Shutterstock, and Freepik. Provide a JSON response with:
-                    - title: A catchy, SEO-friendly title (max 60 characters)
-                    - description: Detailed description for stock photo sites (max 150 characters)
-                    - keywords: Array of EXACTLY 20-25 unique keywords/tags for general search
-                    - topTenKeywords: Array of exactly 10 most important keywords prioritized for stock photo sites
-                    - altText: Accessible alt text description
-                    - category: Main category (e.g., Business, Nature, Technology, People, Abstract, etc.)
+                    text: `You are a professional stock photo metadata expert. Analyze this image and generate metadata optimized for iStock, Adobe Stock, Shutterstock, and Freepik.
+
+                    STRICT REQUIREMENTS - NO EXCEPTIONS:
                     
-                    CRITICAL KEYWORD RULES - NO EXCEPTIONS:
-                    1. Maximum 20-25 keywords total - count them carefully
-                    2. NO repetitive words (avoid: work/working/worker, business/corporate/professional together)
-                    3. NO similar meanings or synonyms in same set
-                    4. Each keyword must attract DIFFERENT buyer traffic
-                    5. Each keyword must be COMPLETELY UNIQUE in meaning and purpose
-                    6. Focus on specific, commercial terms that buyers actually search for
-                    7. Avoid generic adjectives - use specific nouns and action words
-                    8. topTenKeywords must be most commercially valuable terms
+                    1. KEYWORDS: Generate EXACTLY 15-20 completely unique keywords
+                    2. NO REPETITION: Never use variations of same word (work/working/worker)
+                    3. NO SYNONYMS: Never use similar meanings (business/corporate/professional)
+                    4. UNIQUE BUYER INTENT: Each keyword targets different buyer searches
+                    5. COMMERCIAL FOCUS: Only commercially valuable search terms
+                    6. SPECIFIC TERMS: Avoid generic adjectives, use specific nouns/verbs
                     
-                    Examples of what NOT to do:
-                    - "business, corporate, professional" (similar meanings)
-                    - "work, working, worker" (repetitive forms)
-                    - "happy, joyful, cheerful" (synonyms)
+                    FORBIDDEN COMBINATIONS (never use together):
+                    - work, working, worker, workplace, workforce
+                    - business, corporate, professional, commercial, enterprise
+                    - happy, joyful, cheerful, pleased, delighted, smiling
+                    - success, successful, achievement, accomplish, winning
+                    - team, teamwork, collaboration, cooperative, group
+                    - technology, tech, digital, technological
+                    - people, person, individuals, humans, personnel
+                    - modern, contemporary, current, new, recent
+                    - young, youth, youthful, junior
+                    - man, male, gentleman, masculine
+                    - woman, female, lady, feminine
                     
-                    Focus on commercial use, marketability, and unique searchable terms. Each keyword should target a different buyer intent.`
+                    Generate JSON with:
+                    - title: SEO title (max 60 chars)
+                    - description: Stock site description (max 150 chars)  
+                    - keywords: Array of 15-20 unique commercial keywords
+                    - topTenKeywords: Best 10 keywords from the main list
+                    - altText: Accessibility description
+                    - category: Main category
+                    
+                    Count keywords carefully. Quality over quantity. Each keyword must serve a unique commercial purpose.`
                   },
                   {
                     inlineData: {
@@ -225,13 +275,42 @@ const MetadataGenerator = () => {
           if (jsonMatch) {
             const result = JSON.parse(jsonMatch[0]);
             
-            // Validate and clean keywords according to strict rules
+            // Triple validation: AI response + keyword cleaning + final check
             result.keywords = validateAndCleanKeywords(result.keywords);
             
-            // Ensure topTenKeywords exists and has exactly 10 items
+            // Final quality check - ensure no repetition missed
+            const finalKeywords = [];
+            const seenWords = new Set();
+            
+            for (const keyword of result.keywords) {
+              const words = keyword.toLowerCase().split(/[\s-_]+/);
+              let hasConflict = false;
+              
+              for (const word of words) {
+                if (seenWords.has(word) && word.length > 2) {
+                  hasConflict = true;
+                  break;
+                }
+              }
+              
+              if (!hasConflict) {
+                words.forEach(word => word.length > 2 && seenWords.add(word));
+                finalKeywords.push(keyword);
+              }
+              
+              if (finalKeywords.length >= 20) break;
+            }
+            
+            result.keywords = finalKeywords;
+            
+            // Ensure topTenKeywords exists and has exactly 10 items from cleaned keywords
             if (!result.topTenKeywords || result.topTenKeywords.length !== 10) {
               result.topTenKeywords = result.keywords.slice(0, 10);
             }
+            
+            // Log for debugging
+            console.log('Final keyword count:', result.keywords.length);
+            console.log('Keywords:', result.keywords);
             
             resolve(result);
           } else {
