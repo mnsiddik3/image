@@ -220,50 +220,51 @@ const MetadataGenerator = () => {
                   {
                     text: `You are a professional stock photo metadata expert. Analyze this image and generate metadata optimized for iStock, Adobe Stock, Shutterstock, and Freepik.
 
-                    METADATA CONSISTENCY REQUIREMENTS:
-                    1. First generate TITLE and DESCRIPTION
-                    2. Then create keywords that SUPPORT and EXPAND on the title/description concepts
-                    3. Keywords must be DIRECTLY RELATED to what's described in title/description
-                    4. Maintain semantic consistency across all metadata elements
+                    STEP 1: Create title and description first
+                    STEP 2: Extract key concepts from title and description 
+                    STEP 3: Build keywords ONLY from those concepts
+
+                    KEYWORD CONSISTENCY RULE:
+                    Every keyword MUST be directly derived from words or concepts mentioned in the title or description. If a concept isn't in the title/description, it cannot be a keyword.
+
+                    PROCESS:
+                    1. Write a specific title describing the main subject and action
+                    2. Write a description that expands on the title with context and details  
+                    3. List all key concepts from title + description
+                    4. Create keywords using ONLY these concepts and their logical extensions
                     
-                    STRICT KEYWORD REQUIREMENTS - NO EXCEPTIONS:
+                    KEYWORD RULES:
+                    - Extract 15-20 keywords directly from title/description concepts
+                    - Include main subject, action, setting, mood, style mentioned in title/description
+                    - Add related commercial terms that connect to your title/description theme
+                    - NO generic words that aren't connected to your specific title/description
+                    - Each keyword must trace back to something in title or description
                     
-                    1. KEYWORDS: Generate EXACTLY 15-20 completely unique keywords
-                    2. TITLE/DESCRIPTION ALIGNMENT: Keywords must relate to and support the title/description themes
-                    3. NO REPETITION: Never use variations of same word (work/working/worker)
-                    4. NO SYNONYMS: Never use similar meanings (business/corporate/professional)
-                    5. UNIQUE BUYER INTENT: Each keyword targets different buyer searches while staying thematically connected
-                    6. COMMERCIAL FOCUS: Only commercially valuable search terms that relate to the image content
-                    7. SPECIFIC TERMS: Avoid generic adjectives, use specific nouns/verbs that match the title/description
-                    
-                    FORBIDDEN COMBINATIONS (never use together):
+                    FORBIDDEN DUPLICATE CONCEPTS:
                     - work, working, worker, workplace, workforce
-                    - business, corporate, professional, commercial, enterprise
+                    - business, corporate, professional, commercial, enterprise  
                     - happy, joyful, cheerful, pleased, delighted, smiling
                     - success, successful, achievement, accomplish, winning
                     - team, teamwork, collaboration, cooperative, group
                     - technology, tech, digital, technological
                     - people, person, individuals, humans, personnel
                     - modern, contemporary, current, new, recent
-                    - young, youth, youthful, junior
-                    - man, male, gentleman, masculine
-                    - woman, female, lady, feminine
                     
-                    KEYWORD GENERATION PROCESS:
-                    1. Identify main themes from your title and description
-                    2. Create keywords that expand on these themes
-                    3. Include related concepts that buyers would search for
-                    4. Ensure each keyword serves the same target market as title/description
+                    EXAMPLE FLOW:
+                    Title: "Architect reviewing blueprints in modern office"
+                    Description: "Professional architect examining construction plans at desk with computer and drafting tools"
+                    Key concepts: architect, blueprints, office, reviewing, construction, plans, desk, computer, drafting, tools
+                    Keywords derived from these concepts: architect, blueprints, construction-plans, office-desk, drafting-tools, computer-workstation, building-design, etc.
                     
                     Generate JSON with:
-                    - title: SEO title (max 60 chars)
-                    - description: Stock site description (max 150 chars)  
-                    - keywords: Array of 15-20 unique keywords that MATCH title/description themes
-                    - topTenKeywords: Best 10 keywords from the main list that best support title/description
-                    - altText: Accessibility description
+                    - title: Specific SEO title (max 60 chars)
+                    - description: Detailed description that expands on title (max 150 chars)
+                    - keywords: 15-20 keywords derived from title/description concepts only
+                    - topTenKeywords: Best 10 from main list
+                    - altText: Accessibility description  
                     - category: Main category
                     
-                    Remember: Keywords should feel like a natural extension of your title and description, not random words about the image.`
+                    CRITICAL: Every keyword must connect to something mentioned in your title or description.`
                   },
                   {
                     inlineData: {
