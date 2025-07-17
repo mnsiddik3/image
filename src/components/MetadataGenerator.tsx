@@ -698,10 +698,11 @@ const MetadataGenerator = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="text-xs h-7 px-2"
+                                      className="text-xs h-7 px-2 flex-1 sm:flex-none sm:min-w-[80px] md:min-w-[90px]"
                                     >
                                       <Eye className="w-3 h-3 mr-1" />
-                                      View All
+                                      <span className="hidden xs:inline">View All</span>
+                                      <span className="xs:hidden">View</span>
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
